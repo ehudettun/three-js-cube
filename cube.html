@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>My first three.js app</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.132/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.132/examples/js/controls/OrbitControls.js"></script>
+</head>
+<style>
+        html, body {
+  height: 100%;
+}
+    </style>
+<body>
+<div id="threeScene" style="width: 100%; height: 97%;"></div>
+</body>
+<script>
+            let container, renderer, scene, camera, controls;
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+            
+            function init() {
+                container = document.getElementById("threeScene");
+                renderer = new THREE.WebGLRenderer();
+                container.appendChild( renderer.domElement );
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera( 40, container.clientWidth / container.clientHeight, 1, 10000 );
+                camera.position.set( 60, 60, 60 );
+                controls = new THREE.OrbitControls( camera, renderer.domElement );
+                scene.add( new THREE.AmbientLight( 0xffffff ) );
+                let light = new THREE.DirectionalLight( 0xffffff, 2 );
+                light.position.set( 300, 200, 100 );
+                scene.add( light );
+                scene.add( new THREE.AxesHelper( 20 ) );
+                window.addEventListener( 'resize', onWindowResize, false );
+                document.addEventListener( 'mousedown', onMouseDown );
+            }
+            
+            function animate() {
+                requestAnimationFrame( animate );
+                renderer.render( scene, camera );
+            }
+            
+            function onWindowResize(){
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( container.clientWidth, container.clientHeight );
+            }
+            
+            function onMouseDown(event) {
+              mouse.x = ( ( event.clientX - renderer.domElement.offsetLeft ) / renderer.domElement.clientWidth ) * 2 - 1;
+              mouse.y = - ( ( event.clientY - renderer.domElement.offsetTop ) / renderer.domElement.clientHeight ) * 2 + 1;
+                raycaster.setFromCamera( mouse, camera );
+            
+              let intersects = raycaster.intersectObjects( scene.children );
+              if ( intersects.length > 0 ) {
+             
+              }
+            
+            }
+                   
+            
+            function onIntersect(pt) {
+              let sphere = new THREE.Mesh(
+                new THREE.SphereGeometry( 1, 12, 8 ),
+                new THREE.MeshStandardMaterial( {color: 0xffff00} )
+              );
+              sphere.position.set(pt.x, pt.y, pt.z);
+              scene.add(sphere);
+            }        
+                       
+            init();
+            animate();
+
+            function addTextToTexture(texture, text) {
+                const canvas = document.createElement('canvas');
+                canvas.width = texture.image.width;
+                canvas.height = texture.image.height;
+                const context = canvas.getContext('2d');
+
+                // Draw the original texture
+                context.drawImage(texture.image, 0, 0);
+                context.font = '400px Arial';
+                context.fillStyle = 'blue';
+                context.fillText(text, 450, 450);
+
+                // Update the texture
+                texture.image = canvas;
+                texture.needsUpdate = true;
+            }
+            
+            
+            
+            
+            let materials = [];
+            const loader = new THREE.TextureLoader();
+           
+                 for (let i = 0; i < 6; i++) {
+                  loader.load(i+'.jpg', function(texture) {
+                 texture.needsUpdate = true;
+                     materials.push(new THREE.MeshStandardMaterial({ map: texture }));
+                     addTextToTexture(texture, `Face ${i+1}`);
+                 });
+
+                //addTextToTexture(texture, `Face 1`);
+                //const material = new THREE.MeshStandardMaterial({map: texture})
+
+                let cube = new THREE.Mesh(
+                    new THREE.BoxGeometry(20, 20, 20, 1, 1, 1),
+                    materials
+                );
+                scene.add(cube);
+            };
+            
+            
+            </script>
+</html>
